@@ -1,5 +1,12 @@
 import { buttons } from "../../utils/buttons-info";
 import "./Button.css";
+import { ModalAlert } from "../ModalAlert/ModalAlert";
+
+const alerts = [
+  "El analizador sintáctico ha dectado que la cadena ingresada inicia con alguno de los siguientes símbolos (  +  -  *  /  .  ) como se puede ver en la cadena ingresada",
+  "El analizador sintáctico ha dectado que la cadena ingresada finaliza con alguno de los siguientes símbolos (  +  -  *  /  .  ) como se puede ver en la cadena ingresada",
+  "El analizador sintáctico ha dectado que en la cadena ingresada tiene alguno de los siguientes símbolos aritmeticos escritos consecutivamente (  +  -  *  /  .  ) como se puede ver en la cadena ingresada",
+];
 
 let termsCounter = 1;
 let termDotsRestriction = {
@@ -30,60 +37,67 @@ const buttonNumberClicked = (index, valueInput, setValueInput) => {
   setValueInput((prev) => prev + btnValue.toString());
 };
 
-const buttonSymbolClicked = (index, valueInput, setValueInput) => {
-  if (valueInput === "Math Error" || valueInput === "Infinity") {
-    buttonResetClicked(setValueInput);
-  }
-
+const buttonSymbolClicked = (
+  index,
+  valueInput,
+  setValueInput,
+  currentAlert,
+  setCurrentAlert
+) => {
   const btnValue = buttons[index].value;
-  const lastChar = valueInput.charAt(valueInput.length - 1);
-
-  const symbols = ["+", "-", ".", "/", "x", "="];
-  const symbolValidation = symbols.includes(lastChar);
-
-  if (
-    !symbolValidation &&
-    valueInput !== "" &&
-    valueInput !== "Math Error" &&
-    valueInput !== "Infinity"
-  ) {
-    if (btnValue !== ".") {
-      createAnotherTerm();
-    }
-    const currentIndexTerm = Object.keys(termDotsRestriction)[termsCounter - 1];
-    const isThereADot = termDotsRestriction[currentIndexTerm].includes(".");
-
-    if (isThereADot) {
-      if (!btnValue === ".") {
-        addNumberToTerm(btnValue);
-        setValueInput((prev) => prev + btnValue);
-      }
-    } else if (!isThereADot) {
-      addNumberToTerm(btnValue);
-      setValueInput((prev) => prev + btnValue);
-    }
-  }
+  addNumberToTerm(btnValue);
+  setValueInput((prev) => prev + btnValue);
 };
 
-const buttonEqualsClicked = (valueInput, setValueInput) => {
+const buttonEqualsClicked = (
+  valueInput,
+  setValueInput,
+  currentAlert,
+  setCurrentAlert,
+  showModal,
+  setShowModal
+) => {
   if (valueInput === "Math Error" || valueInput === "Infinity") {
     buttonResetClicked(setValueInput);
   }
 
   try {
     if (valueInput !== "") {
-      let mathOperation = eval(valueInput);
+      if (
+        valueInput[0] !== "." &&
+        valueInput[0] !== "/" &&
+        valueInput[0] !== "*" &&
+        valueInput[0] !== "+" &&
+        valueInput[0] !== "-"
+      ) {
+        let mathOperation = eval(valueInput);
 
-      if (mathOperation % 1 !== 0) {
-        mathOperation = mathOperation.toFixed(5);
+        if (mathOperation % 1 !== 0) {
+          mathOperation = mathOperation.toFixed(5);
+        }
+
+        buttonResetClicked(setValueInput);
+
+        setValueInput(mathOperation.toString());
+      } else {
+        setCurrentAlert(alerts[0]);
+        setShowModal(true);
       }
-
-      buttonResetClicked(setValueInput);
-
-      setValueInput(mathOperation);
     }
   } catch (error) {
-    setValueInput("Math Error");
+    if (
+      valueInput[valueInput.length - 1] === "+" ||
+      valueInput[valueInput.length - 1] === "-" ||
+      valueInput[valueInput.length - 1] === "*" ||
+      valueInput[valueInput.length - 1] === "/" ||
+      valueInput[valueInput.length - 1] === "."
+    ) {
+      setCurrentAlert(alerts[1]);
+      setShowModal(true);
+    } else {
+      setCurrentAlert(alerts[2]);
+      setShowModal(true);
+    }
   }
 };
 
@@ -114,6 +128,10 @@ function Button({
   valueInput,
   setValueInput,
   theme,
+  currentAlert,
+  setCurrentAlert,
+  showModal,
+  setShowModal,
 }) {
   return (
     <button
@@ -126,9 +144,22 @@ function Button({
         if (type === "number") {
           return buttonNumberClicked(index, valueInput, setValueInput);
         } else if (type === "symbol") {
-          buttonSymbolClicked(index, valueInput, setValueInput);
+          buttonSymbolClicked(
+            index,
+            valueInput,
+            setValueInput,
+            currentAlert,
+            setCurrentAlert
+          );
         } else if (type === "equals") {
-          buttonEqualsClicked(valueInput, setValueInput);
+          buttonEqualsClicked(
+            valueInput,
+            setValueInput,
+            currentAlert,
+            setCurrentAlert,
+            showModal,
+            setShowModal
+          );
         } else if (type === "deletion") {
           buttonDeletionClicked(valueInput, setValueInput);
         } else if (type === "reset") {

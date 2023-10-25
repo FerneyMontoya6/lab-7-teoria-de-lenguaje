@@ -9,12 +9,20 @@ import { ToggleContainer } from "./components/ToggleContainer/ToggleContainer";
 import { Input } from "./components/Input/Input";
 import { ButtonsContainer } from "./components/ButtonsContainer/ButtonsContainer";
 import { useState } from "react";
+import { ModalAlert } from "./components/ModalAlert/ModalAlert";
 
 function App() {
   const themes = ["theme-default", "theme-white", "theme-gamer"];
+  const alerts = [
+    "El analizador sintáctico ha dectado que la cadena ingresada inicia con alguno de los siguientes símbolos (  +  -  *  /  .  )",
+    "final-symbol",
+    "consecutive-symbol",
+  ];
 
   const [valueInput, setValueInput] = useState("");
   const [themeToggle, setThemeToggle] = useState(themes[0]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentAlert, setCurrentAlert] = useState(alerts[0]);
 
   const bodyThemes = {
     "theme-default": "hsl(222, 26%, 31%)",
@@ -47,10 +55,21 @@ function App() {
               size={button.size}
               valueInput={valueInput}
               setValueInput={setValueInput}
+              currentAlert={currentAlert}
+              setCurrentAlert={setCurrentAlert}
+              showModal={showModal}
+              setShowModal={setShowModal}
             />
           ))}
         </ButtonsContainer>
       </CalcContainer>
+
+      <ModalAlert
+        show={showModal}
+        currentAlert={currentAlert}
+        valueInput={valueInput}
+        onHide={() => setShowModal(false)}
+      ></ModalAlert>
     </>
   );
 }

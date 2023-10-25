@@ -1,0 +1,8 @@
+TODOS
+1. Errores sintácticos: 
+    - Para cuando se inicia con alguno de los siguientes caracteres ( + - * / . )
+    - Para cuando se finaliza con alguno de los siguientes caracteres ( + - * / . )
+    - Para cuando en toda la cadena hay alguno de los siguientes caracteres repetidos
+      de manera consecutiva ( + - * / . )
+
+2. Implementar la librería de react-bootstrap para un modal más agradable.      
